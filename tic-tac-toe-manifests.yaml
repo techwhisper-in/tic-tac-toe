@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tic-tac-toe
+  namespace: ns-tic-tac-toe
+  labels:
+    app.kubernetes.io/name: tic-tac-toe
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: tic-tac-toe
+    app.kubernetes.io/managed-by: argocd
+spec:
+  replicas: 3
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tic-tac-toe
+      app.kubernetes.io/component: frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tic-tac-toe
+        app.kubernetes.io/component: frontend
+        app.kubernetes.io/part-of: tic-tac-toe
+    spec:
+      containers:
+      - name: web
+        image: techwhisper/ankit-public:tic-tac-toe_v0.0.1
+        ports:
+          - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tic-tac-toe
+  namespace: ns-tic-tac-toe
+  labels:
+    app.kubernetes.io/name: tic-tac-toe
+    app.kubernetes.io/component: frontend
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: tic-tac-toe
+    app.kubernetes.io/component: frontend
+  ports:
+  - name: http
+    port: 8081
+    targetPort: 80
+    protocol: TCP
+    nodePort: 30123
