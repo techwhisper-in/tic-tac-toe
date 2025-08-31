@@ -9,8 +9,8 @@ metadata:
     app.kubernetes.io/part-of: tic-tac-toe
     app.kubernetes.io/managed-by: argocd
 spec:
-  replicas: 3
-  revisionHistoryLimit: 5
+  replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: tic-tac-toe
