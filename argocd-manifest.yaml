@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tic-tac-toe
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: tic-tac-toe
+    app.kubernetes.io/part-of: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ns-tic-tac-toe  # Matches your manifest namespace
+  source:
+    repoURL: https://github.com/techwhisper-in/tic-tac-toe
+    targetRevision: HEAD
+    path: manifest  # Path to your manifest files in the repo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true  # Will create ns-tic-tac-toe namespace
+    - PruneLast=true
+    retry:
+      limit: 2
+      backoff:
+        duration: 5s
+        maxDuration: 3m0s
+        factor: 2
